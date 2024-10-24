@@ -100,7 +100,7 @@ class Graphs:
             self.Matrix.append(row)
 
     def CountInAndOutDeg(self) -> None:
-        """counts in and out degrees, only work with adjacency list"""
+        """counts in and out degrees, only works with adjacency list"""
         if not self.AdjacencyListAsDict:
             print("empty dict")
             return
