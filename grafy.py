@@ -11,6 +11,8 @@ class Graphs:
         self.AdjacencyListAsDict = {}
         self.Matrix = []
         self.InOutDegList = []
+        self.Exercise7Queries = []
+        self.Exercise7Answers = []
 
     def GetAdjacencyListAsDict(self) -> dict[int, list[int]]:
         return self.AdjacencyListAsDict
@@ -20,6 +22,9 @@ class Graphs:
     
     def GetInOutDegList(self) -> list[list[int, int]]:
         return self.InOutDegList
+    
+    def GetExercise7Queries(self) -> list:
+        return self.Exercise7Queries
 
     def ReadAdjacencyList(self, version: ReadVersion) -> None:
         if version == ReadVersion.STEPIK:
@@ -43,7 +48,6 @@ class Graphs:
                 adjacent_nodes = list(map(int,a[1:]))
                 self.AdjacencyListAsDict.update({node:adjacent_nodes})
 
-
     def ReadAdjacencyMatrix(self, version: ReadVersion) -> None:
         if version == ReadVersion.STEPIK:
             while True:
@@ -59,6 +63,13 @@ class Graphs:
                 if not a:
                     break
                 self.Matrix.append(list(map(int,a.split())))
+
+    def Exercise7ReadInput(self) -> list:
+        """reads adjacency list, reads and appends all the queries to queries list"""
+        self.AdjacencyListAsDict = eval(input())
+        q = int(input())
+        for _ in range(q):
+            self.Exercise7Queries.append(input())
 
     def ConvertMatrixIntoAList(self) -> None:
         if not self.Matrix:
@@ -89,7 +100,7 @@ class Graphs:
             self.Matrix.append(row)
 
     def CountInAndOutDeg(self) -> None:
-        """only counts in and out deg from adjacency list!!"""
+        """counts in and out degrees, only work with adjacency list"""
         if not self.AdjacencyListAsDict:
             print("empty dict")
             return
@@ -104,7 +115,46 @@ class Graphs:
             for value in values:
                 self.InOutDegList[value-1][0] += 1
 
+    def GetAmountOfNeighbours(self, key: int) -> int:
+        """returns number of neighbours of given node, only works with adjacency list"""
+        if key in self.AdjacencyListAsDict:
+            return len(self.AdjacencyListAsDict[key])
+        else:
+            raise ValueError("key not in dictionary")
         
+    def AreNodesConnected(self, node1: int, node2: int) -> bool:
+        """checks if nodes are connected, only works with adjacency list"""
+        for node in (node1, node2):
+            if node not in self.AdjacencyListAsDict:
+                raise ValueError(f"{node} doesnt exist")
+        
+        return node2 in self.AdjacencyListAsDict[node1]
+    
+    def Exercise7TransformQueries(self) -> None:
+        transformed_queries = []
+        for query in self.Exercise7Queries:
+            querySplit = query.split()
+            queryTransformed = [x if x.isalpha() else int(x) for x in querySplit]
+            transformed_queries.append(queryTransformed)
+        self.Exercise7Queries = transformed_queries
+
+    def Exercise7AnswerQueries(self) -> None:
+        for query in self.Exercise7Queries:
+            if query[0] == "neighbours":
+                amounOfNeighbours = self.GetAmountOfNeighbours(query[1])
+                self.Exercise7Answers.append(amounOfNeighbours)
+            elif query[0] == "connection":
+                areNodesConnected = self.AreNodesConnected(query[1], query[2])
+                self.Exercise7Answers.append(areNodesConnected)
+
+    def Exercise7PrintAnswers(self) -> None:
+        for answer in self.Exercise7Answers:
+            if answer is True:
+                print('Yes')
+            elif answer is False:
+                print('No')
+            else:
+                print(answer)
 
         
     def PrintInAndOutDegList(self) -> None:
@@ -125,7 +175,6 @@ class Graphs:
             else:
                 print(self.InOutDegList[i][1])
 
-
     def PrintDictAsAdjacencyList(self) -> None:
         for key, value in self.AdjacencyListAsDict.items():
             print(key, value)
@@ -138,21 +187,13 @@ class Graphs:
 
 grafy = Graphs()
 #grafy.ReadAdjacencyMatrix(ReadVersion.MANUAL)
-grafy.ReadAdjacencyList(ReadVersion.MANUAL)
+#grafy.ReadAdjacencyList(ReadVersion.MANUAL)
 #grafy.PrintAdjacencyMatrix()
-grafy.PrintDictAsAdjacencyList()
-grafy.CountInAndOutDeg()
-grafy.PrintInAndOutDegList()
 #grafy.ConvertMatrixIntoAList()
-
-
-# 0 1 0 1 1 0 1 1 1 1
-# 1 0 1 1 1 0 0 1 1 1
-# 0 1 0 1 0 1 1 0 1 0
-# 1 1 1 0 1 1 1 1 1 1
-# 1 1 0 1 0 1 0 0 1 0
-# 0 0 1 1 1 0 1 1 0 1
-# 1 0 1 1 0 1 0 1 0 1
-# 1 1 0 1 0 1 1 0 1 1
-# 1 1 1 1 1 0 0 1 0 0
-# 1 1 0 1 0 1 1 1 0 0
+#grafy.PrintDictAsAdjacencyList()
+#print(grafy.GetAmountOfNeighbours(2))
+#print(grafy.AreNodesConnected(7, 2))
+grafy.Exercise7ReadInput()
+grafy.Exercise7TransformQueries()
+grafy.Exercise7AnswerQueries()
+grafy.Exercise7PrintAnswers()
