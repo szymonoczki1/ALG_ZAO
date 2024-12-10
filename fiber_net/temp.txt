@@ -1,0 +1,278 @@
+class Stack:
+    def __init__(self) -> None:
+        self.stack = []
+    
+    def push(self, element):
+        self.stack.append(element)
+
+    def pop(self):
+        if not self.stack:
+            return "Error, cant pop from empty stack."
+
+        return self.stack.pop()
+    
+    def peek(self):
+        if not self.stack:
+            return "Error, cant peek into an empty stack."
+        return self.stack[-1]
+    
+    def is_empty(self):
+        return len(self.stack) == 0
+
+class MaxHeapSort:
+    def __init__(self, heap) -> None:
+        self.heap = heap
+        self.heap_sort()
+
+    def heapify(self, n, i):
+        #root
+        largest = i
+        #left child
+        l = 2 * i + 1
+        #right child     
+        r = 2 * i + 2
+
+        #l<n if its still in our array, compare nodes returns true if left child is supposed to be swapped with parent
+        if l < n and self.compare_nodes(self.heap[l], self.heap[largest]):
+            largest = l
+
+        #check if right child exists and is greater than root
+        if r < n and self.compare_nodes(self.heap[r], self.heap[largest]):
+            largest = r
+
+        #change root if needed
+        if largest != i:
+            self.heap[i], self.heap[largest] = self.heap[largest], self.heap[i]  # Swap
+
+            #heapify the root
+            self.heapify(n, largest)
+
+    def compare_nodes(self, node1, node2):
+        if node1[2] != node2[2]:
+            return node1[2] > node2[2]
+        if node1[0] != node2[0]:
+            return node1[0] > node2[0]
+        return node1[1] > node2[1]
+
+    def heap_sort(self):
+        n = len(self.heap)
+
+        # build a max heap
+        for i in range(n // 2 - 1, -1, -1):
+            self.heapify(n, i)
+
+        # get max, fix heap
+        for i in range(n-1, 0, -1):
+            self.heap[i], self.heap[0] = self.heap[0], self.heap[i]  # Swap the root with the last element
+            self.heapify(i, 0)
+
+
+class DisjointSetUnion:
+    def __init__(self, n):
+        self.parent = [i for i in range(n)]
+        self.rank = [0] * n
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x, y):
+        root_x = self.find(x)
+        root_y = self.find(y)
+
+        if root_x == root_y:
+            #print(f"Union skipped for {x}-{y}, already connected.")
+            return False
+
+        if self.rank[root_x] < self.rank[root_y]:
+            self.parent[root_x] = root_y
+        elif self.rank[root_x] > self.rank[root_y]:
+            self.parent[root_y] = root_x
+        else:
+            self.parent[root_y] = root_x
+            self.rank[root_x] += 1
+
+        #print(f"Union successful for {x}-{y}")
+        return True
+
+
+class Kruskal:
+    def __init__(self, n, edges):
+        self.n = n
+        self.edges = edges
+
+    def find_mst(self):
+        dsu = DisjointSetUnion(self.n)
+        heap = MaxHeapSort(self.edges)
+        edges_sorted = heap.heap
+
+        mst = []
+        total_cost = 0
+
+        for u, v, w in edges_sorted:
+            if dsu.union(u - 1, v - 1):
+                #print(f"Added edge ({u}, {v}) with weight {w}")
+                mst.append((u, v, w))
+                total_cost += w
+
+                if len(mst) == self.n - 1:
+                    break
+
+        if len(mst) == self.n - 1:
+            return mst, total_cost
+        else:
+            #print("Edges in MST:", mst)
+            return None, None
+        
+
+
+class DFS:
+    def __init__(self, edges) -> None:
+        self.edges = edges
+        self.adjacency_list_as_dict = {}
+        self.visited_vertices = []
+        self.discovery = {}
+        self.low = {}
+        self.parent = {}
+        self.time = 0
+        self.bridges = []
+        self.components = []
+
+        self.stack = Stack()
+        self.build_adjacency_list()
+        self.starting_vertex = list(self.adjacency_list_as_dict.keys())[0]
+
+        self.find_bridges()
+        self.find_components()
+
+        #print(self)
+
+    def build_adjacency_list(self):
+        for u, v, w in self.edges:
+            if u not in self.adjacency_list_as_dict:
+                self.adjacency_list_as_dict[u] = []
+            if v not in self.adjacency_list_as_dict:
+                self.adjacency_list_as_dict[v] = []
+            self.adjacency_list_as_dict[u].append(v)
+            self.adjacency_list_as_dict[v].append(u)
+
+    def find_bridges(self):
+        for vertex in self.adjacency_list_as_dict:
+            self.discovery[vertex] = -1
+            self.low[vertex] = -1
+            self.parent[vertex] = None
+
+        self.dfs_bridge(self.starting_vertex)
+
+        self.bridges.sort()
+
+    def find_components(self):
+        for bridge in self.bridges:
+            self.adjacency_list_as_dict[bridge[0]].remove(bridge[1])
+            self.adjacency_list_as_dict[bridge[1]].remove(bridge[0])
+        
+        visited = set()
+        components = []
+
+        def dfs_components(node, component):
+            visited.add(node)
+            component.append(node)
+            for neighbor in self.adjacency_list_as_dict[node]:
+                if neighbor not in visited:
+                    dfs_components(neighbor, component)
+
+        for node in self.adjacency_list_as_dict:
+            if node not in visited:
+                component = []
+                dfs_components(node, component)
+                components.append(component)
+
+        self.components = components
+
+    
+
+    def dfs_bridge(self, u):
+        self.visited_vertices.append(u)
+        self.discovery[u] = self.low[u] = self.time
+        self.time += 1
+
+        for v in self.adjacency_list_as_dict[u]:
+            if self.discovery[v] == -1:
+                self.parent[v] = u
+                self.dfs_bridge(v)
+
+                self.low[u] = min(self.low[u], self.low[v])
+
+                if self.low[v] > self.discovery[u]:
+                    self.bridges.append((u, v))
+            elif v != self.parent[u]:
+                self.low[u] = min(self.low[u], self.discovery[v])
+
+    def get_bridges_components(self):
+        return self.bridges, self.components
+
+    def __str__(self):
+        return f"Connected Components: {self.components}\nBridges: {self.bridges}"
+
+
+
+
+class FiberNet():
+    def __init__(self) -> None:
+        self.n = 0
+        self.m = 0
+        
+        
+        self.edges = []
+        
+        self.read_input()
+        
+        self.kruskal = Kruskal(self.n, self.edges)
+        self.mst, self.cost = self.kruskal.find_mst()
+        self.dfs = DFS(self.edges)
+        self.bridges, self.components = self.dfs.get_bridges_components()
+        
+        print(self)
+
+
+    def read_input(self):
+        first_line = input().split()
+        self.n = int(first_line[0])
+        self.m = int(first_line[1])
+        
+        for i in range(self.m):
+            self.edges.append(tuple(map(int, input().split())))
+
+    def __str__(self):
+        output = []
+
+        output.append("MINIMALNE DRZEWO SPINAJĄCE:")
+        for edge in self.mst:
+            output.append(f"{edge[0]} {edge[1]} {edge[2]}")
+        output.append(f"Łączny koszt: {self.cost}")
+        output.append("")
+        output.append("MOSTY:")
+
+        if not self.bridges:
+            output.append("BRAK MOSTÓW")
+        else:
+            for bridge in self.bridges:
+                output.append(f"{bridge[0]} {bridge[1]}")
+        output.append("")
+        output.append("KOMPONENTY:")
+        komponenty = []
+        for component in self.components:
+            component.sort()
+            komponenty.append("[" + " ".join(map(str, component)) + "]")
+
+        output.append(f"{len(self.components)} KOMPONENTY: {' '.join(komponenty)}")
+
+        return "\n".join(output)
+
+        
+
+        
+        
+       
+FiberNet()

@@ -53,8 +53,10 @@ class TechTower():
             self.emergency_exits = list(map(int, second_to_last_line.split()))
             if len(self.emergency_exits) != self.emergency_exits_amount:
                 raise ValueError(f"wrong number of emergency exits, expected {self.emergency_exits_amount}")
-            if self.emergency_exits != QuickSort(self.emergency_exits).sort():
-                raise ValueError("emergency exits should be sorted")
+            QuickSort(self.emergency_exits).sort()
+            # temp = self.emergency_exits[:]
+            # if self.emergency_exits != QuickSort(temp).sort():
+            #     raise ValueError("emergency exits should be sorted")
             
             #this onyl works because we already checked if the list is sorted
             if self.emergency_exits[0] < 1 or self.emergency_exits[-1] > self.room_amount:
@@ -66,8 +68,10 @@ class TechTower():
             self.dangerous_rooms = list(map(int, last_line.split()))
             if len(self.dangerous_rooms) != self.dangerous_rooms_amount:
                 raise ValueError(f"wrong number of dangerous rooms, expected {self.dangerous_rooms_amount}")
-            if self.dangerous_rooms != QuickSort(self.dangerous_rooms).sort():
-                raise ValueError("dangerous rooms should be sorted")
+            QuickSort(self.dangerous_rooms).sort()
+            # temp = self.dangerous_rooms[:]
+            # if self.dangerous_rooms != QuickSort(temp).sort():
+            #     raise ValueError("dangerous rooms should be sorted")
             
             if self.dangerous_rooms[0] < 1 or self.dangerous_rooms[-1] > self.room_amount:
                 raise ValueError("dangerous rooms have to exist in the tower")
