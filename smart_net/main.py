@@ -1,6 +1,6 @@
 from dijkstry import Dijkstra
 from kruskal import Kruskal
-from critical_points import CriticalPoints
+from articulation_points import ArticulationPoints
 
 class SmartNet:
     def __init__(self) -> None:
@@ -10,10 +10,10 @@ class SmartNet:
 
         self.read_and_validate_input()
 
-        self.cp = CriticalPoints(self.n, self.edges)
+        self.ap = ArticulationPoints(self.n, self.edges)
 
         #checks if graph is connected
-        if self.cp.critical_points == None:
+        if self.ap.articulation_points == None:
             print("BŁĄD")
             exit()
 
@@ -90,8 +90,8 @@ class SmartNet:
         output.append("")
 
         output.append("PUNKTY KRYTYCZNE:")
-        if self.cp.critical_points:
-            output.append(f"{" ".join(map(str,self.cp.critical_points))}")
+        if self.ap.articulation_points:
+            output.append(f"{" ".join(map(str,self.ap.articulation_points))}")
         else:
             output.append("BRAK")
 
